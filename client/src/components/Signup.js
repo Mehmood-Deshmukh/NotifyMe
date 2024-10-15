@@ -67,7 +67,7 @@ function Signup() {
       });
       window.google.accounts.id.renderButton(
         document.getElementById('googleSignInButton'),
-        { theme: 'outline', size: 'large' }
+        { theme: 'outline', size: 'large', width: '350' }
       );
     }
   }, []);
@@ -163,8 +163,8 @@ function Signup() {
             </div>
           </div>
 
-          <div className="mt-6 flex justify-center align-center">
-            <div id="googleSignInButton" className={`h-12 w-full ${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
+          <div className="flex justify-center mt-6">
+            <div id="googleSignInButton" className={`h-12 ${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
             {isGoogleLoading && (
               <div className="mt-2 flex justify-center items-center text-sm text-gray-500">
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
