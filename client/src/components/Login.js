@@ -11,18 +11,6 @@ function Login() {
   const { login, googleSignIn } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -148,7 +136,7 @@ function Login() {
           </div>
 
           <div className="mt-6">
-            <div id="googleSignInButton" className={`${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
+            <div id="googleSignInButton" className={`h-12 ${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
             {isGoogleLoading && (
               <div className="mt-2 flex justify-center items-center text-sm text-gray-500">
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
