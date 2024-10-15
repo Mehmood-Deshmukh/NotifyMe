@@ -84,4 +84,51 @@ const login = async (req, res) => {
   }
 };
 
-export { signup, login };
+const googleSignIn = async (req, res) => {
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ error: 'Google access token is required' });
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: credential,
+    });
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    const { user, session } = data;
+
+    let dbUser = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
+
+    if (dbUser.length === 0) {
+
+      const [firstname, ...lastnameArray] = user.user_metadata.full_name.split(' ');
+      const lastname = lastnameArray.join(' ');
+
+      await db.insert(users).values({
+        id: user.id,
+        email: user.email,
+        firstname,
+        lastname
+      });
+
+      dbUser = [{ id: user.id, email: user.email, firstname, lastname }];
+    }
+
+    return res.status(200).json({
+      message: 'Google sign-in successful',
+      user: dbUser[0],
+      session
+    });
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    return res.status(500).json({ error: 'An error occurred during Google sign-in' });
+  }
+};
+
+export { signup, login, googleSignIn };

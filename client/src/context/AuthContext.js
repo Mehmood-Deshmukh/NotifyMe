@@ -46,12 +46,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleSignIn = async (credential) => {
+    try {
+      const response = await fetch(`${baseUrl}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        setUser(data.user);
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      return { success: false, error: 'An error occurred during Google sign-in' };
+    }
+  };
+
   const logout = () => {
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, googleSignIn }}>
       {children}
     </AuthContext.Provider>
   );
