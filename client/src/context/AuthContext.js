@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const AuthContext = createContext();
 
@@ -7,6 +7,18 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const baseUrl = process.env.REACT_APP_BASE_URL;
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const saveUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
 
   const login = async (email, password) => {
     try {
@@ -17,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (response.ok) {
-        setUser(data.user);
+        saveUser(data.user);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -36,7 +48,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (response.ok) {
-        setUser(data.user);
+        saveUser(data.user);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -56,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log(data);
       if (response.ok) {
-        setUser(data.user);
+        saveUser(data.user);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -68,6 +80,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (
