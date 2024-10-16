@@ -13,7 +13,6 @@ const Dashboard = () => {
   const [error, setError] = useState('');
 
   const baseUrl = process.env.REACT_APP_BASE_URL;
-  const ISTOffset = 5.5 * 60 * 60 * 1000; // IST offset in milliseconds
 
   useEffect(() => {
     fetchTasks();
@@ -49,25 +48,14 @@ const Dashboard = () => {
       setError('Please enter task name, due date, and reminder time');
       return;
     }
-
-    // Check if running on localhost
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
     try {
-      const dueDateAdjusted = isLocalhost ? new Date(dueDate) : new Date(new Date(dueDate).getTime() + ISTOffset);
-      const reminderTimeAdjusted = isLocalhost ? new Date(reminderTime) : new Date(new Date(reminderTime).getTime() + ISTOffset);
-
       const response = await fetch(`${baseUrl}/api/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify({
-          taskName: newTaskName,
-          dueDate: dueDateAdjusted.toISOString(),
-          reminderTime: reminderTimeAdjusted.toISOString()
-        })
+        body: JSON.stringify({ taskName: newTaskName, dueDate, reminderTime })
       });
 
       if (response.ok) {
@@ -81,16 +69,6 @@ const Dashboard = () => {
     } catch (err) {
       setError('An error occurred while adding the task');
     }
-  };
-
-  // Function to format UTC date to local time, adjusting for IST if not on localhost
-  const formatLocalTime = (utcDate) => {
-    const date = new Date(utcDate);
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-    // Apply offset only if not running on localhost
-    const localDate = isLocalhost ? date : new Date(date.getTime() + ISTOffset);
-    return localDate.toLocaleString();
   };
 
   return (
@@ -147,8 +125,8 @@ const Dashboard = () => {
           {tasks.map((task) => (
             <div key={task.id} className="bg-gray-50 p-3 rounded-md mb-2">
               <p className="text-gray-800">{task.taskName}</p>
-              <p className="text-sm text-gray-500">Due: {formatLocalTime(task.dueDate)}</p>
-              <p className="text-sm text-gray-500">Reminder: {formatLocalTime(task.reminderTime)}</p>
+              <p className="text-sm text-gray-500">Due: {new Date(task.dueDate).toLocaleString()}</p>
+              <p className="text-sm text-gray-500">Reminder: {new Date(task.reminderTime).toLocaleString()}</p>
               <p className="text-sm text-gray-500">Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
             </div>
           ))}
