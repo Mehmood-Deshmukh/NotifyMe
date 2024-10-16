@@ -19,7 +19,7 @@ export const createTask = async (req, res) => {
     return res.status(400).json({ error: 'Task name, due date, and reminder time are required' });
   }
   try {
-    // Ensure dueDate and reminderTime are valid dates
+    // Convert dueDate and reminderTime to UTC
     const dueDateObj = new Date(dueDate);
     const reminderTimeObj = new Date(reminderTime);
 
@@ -27,11 +27,14 @@ export const createTask = async (req, res) => {
       return res.status(400).json({ error: 'Invalid date format for due date or reminder time' });
     }
 
+    const utcDueDate = new Date(dueDateObj.toUTCString());
+    const utcReminderTime = new Date(reminderTimeObj.toUTCString());
+
     const [newTask] = await db.insert(tasks).values({
       userId: req.user.id,
       taskName,
-      dueDate: dueDateObj,
-      reminderTime: reminderTimeObj,
+      dueDate: utcDueDate,
+      reminderTime: utcReminderTime,
       isCompleted: false
     }).returning();
     
@@ -43,7 +46,6 @@ export const createTask = async (req, res) => {
   }
 };
 
-// Update the updateTask function similarly
 export const updateTask = async (req, res) => {
   const { id } = req.params;
   const { taskName, dueDate, reminderTime, isCompleted } = req.body;
@@ -55,11 +57,14 @@ export const updateTask = async (req, res) => {
       return res.status(400).json({ error: 'Invalid date format for due date or reminder time' });
     }
 
+    const utcDueDate = new Date(dueDateObj.toUTCString());
+    const utcReminderTime = new Date(reminderTimeObj.toUTCString());
+
     const [updatedTask] = await db.update(tasks)
       .set({
         taskName,
-        dueDate: dueDateObj,
-        reminderTime: reminderTimeObj,
+        dueDate: utcDueDate,
+        reminderTime: utcReminderTime,
         isCompleted: isCompleted ?? false,
         updatedAt: new Date()
       })
@@ -76,7 +81,7 @@ export const updateTask = async (req, res) => {
     console.error('Error updating task:', error);
     res.status(500).json({ error: 'Failed to update task' });
   }
-};  
+};
 
 export const deleteTask = async (req, res) => {
   const { id } = req.params;
