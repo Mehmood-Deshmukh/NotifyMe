@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (response.ok) {
+        data.user.token = data.session.access_token;
         saveUser(data.user);
         return { success: true };
       } else {
@@ -47,7 +48,9 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password, name }),
       });
       const data = await response.json();
+      
       if (response.ok) {
+        data.user.token = data.session.access_token;
         saveUser(data.user);
         return { success: true };
       } else {
@@ -66,8 +69,8 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ credential }),
       });
       const data = await response.json();
-      console.log(data);
       if (response.ok) {
+        data.user.token = data.session.access_token;
         saveUser(data.user);
         return { success: true };
       } else {

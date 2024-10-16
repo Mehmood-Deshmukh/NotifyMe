@@ -1,22 +1,47 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes.js';
 import cors from 'cors';
+import cluster from 'cluster';
+import os from 'os';
+import authRoutes from './routes/authRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js'
+import { setupWebPush } from './services/webPushService.js';
+import { setupCronJobs } from './services/cronService.js';
+
 dotenv.config();
 
-const app = express();
+const numCPUs = os.cpus().length;
 
-app.use(express.json());
-app.use(cors());
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork();
+  });
+} else {
+  const app = express();
 
-app.use('/api/auth', authRoutes);
+  app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the Notification Manager App with Supabase and Drizzle ORM');
-});
+  app.use(cors());
 
-const PORT = process.env.PORT || 3000;
+  setupWebPush();
+  setupCronJobs();
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  app.use('/api/auth', authRoutes);
+  app.use('/api/tasks', taskRoutes);
+  app.use('/api/subscribe', subscriptionRoutes);
+
+  app.get('/', (req, res) => {
+    res.send('Welcome to the Notification Manager App with Supabase and Drizzle ORM');
+  });
+  
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Worker ${process.pid} running on port ${PORT}`);
+  });
+}

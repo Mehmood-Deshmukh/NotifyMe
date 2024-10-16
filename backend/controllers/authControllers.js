@@ -3,7 +3,6 @@ import { users } from '../drizzle/schema.js';
 import db from '../config/db.js';
 import { eq } from 'drizzle-orm';
 
-
 const signup = async (req, res) => {
   const { email, password, name } = req.body;
   const [firstname, lastname] = name.split(' ');
@@ -18,8 +17,8 @@ const signup = async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    const { data: supabaseUser, error: supabaseError } = await supabase.auth.signUp({ 
-      email, 
+    const { data, error: supabaseError } = await supabase.auth.signUp({
+      email,
       password,
       options: {
         data: { firstname, lastname }
@@ -30,18 +29,24 @@ const signup = async (req, res) => {
       return res.status(400).json({ error: supabaseError.message });
     }
 
-    await db.insert(users).values({ 
-      id: supabaseUser.user.id,
-      email, 
-      firstname, 
-      lastname 
+    const { user, session } = data;
+
+    await db.insert(users).values({
+      id: user.id,
+      email,
+      firstname,
+      lastname
     });
 
-    return res.status(201).json({ 
-      message: 'User created successfully. Please check your email to confirm your account.',
-      user: { email, firstname, lastname }
+    return res.status(201).json({
+      message: 'User created successfully.',
+      user: { id: user.id, email, firstname, lastname },
+      session: session ? {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_at: session.expires_at
+      } : null
     });
-
   } catch (error) {
     console.error('Signup error:', error);
     return res.status(500).json({ error: 'An error occurred during signup' });
@@ -56,9 +61,9 @@ const login = async (req, res) => {
   }
 
   try {
-    const { data: { session }, error: supabaseError } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
+    const { data: { session }, error: supabaseError } = await supabase.auth.signInWithPassword({
+      email,
+      password
     });
 
     if (supabaseError) {
@@ -66,18 +71,21 @@ const login = async (req, res) => {
     }
 
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-    
     if (!user) {
       return res.status(400).json({ error: 'User not found in the database' });
     }
 
     const { id, email: userEmail, firstname, lastname } = user;
-    return res.status(200).json({ 
-      message: 'Login successful', 
-      user: { id, email: userEmail, firstname, lastname },
-      session 
-    });
 
+    return res.status(200).json({
+      message: 'Login successful',
+      user: { id, email: userEmail, firstname, lastname },
+      session: {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_at: session.expires_at
+      }
+    });
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ error: 'An error occurred during login' });
@@ -102,11 +110,9 @@ const googleSignIn = async (req, res) => {
     }
 
     const { user, session } = data;
-
     let dbUser = await db.select().from(users).where(eq(users.id, user.id)).limit(1);
 
     if (dbUser.length === 0) {
-
       const [firstname, ...lastnameArray] = user.user_metadata.full_name.split(' ');
       const lastname = lastnameArray.join(' ');
 
@@ -123,7 +129,11 @@ const googleSignIn = async (req, res) => {
     return res.status(200).json({
       message: 'Google sign-in successful',
       user: dbUser[0],
-      session
+      session: {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+        expires_at: session.expires_at
+      }
     });
   } catch (error) {
     console.error('Google sign-in error:', error);
