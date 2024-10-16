@@ -48,11 +48,6 @@ const Dashboard = () => {
       setError('Please enter task name, due date, and reminder time');
       return;
     }
-  
-    // Convert dueDate and reminderTime to UTC
-    const dueDateUTC = new Date(dueDate).toISOString();
-    const reminderTimeUTC = new Date(reminderTime).toISOString();
-  
     try {
       const response = await fetch(`${baseUrl}/api/tasks`, {
         method: 'POST',
@@ -60,9 +55,9 @@ const Dashboard = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify({ taskName: newTaskName, dueDate: dueDateUTC, reminderTime: reminderTimeUTC })
+        body: JSON.stringify({ taskName: newTaskName, dueDate, reminderTime })
       });
-  
+
       if (response.ok) {
         setNewTaskName('');
         setDueDate('');
@@ -75,7 +70,7 @@ const Dashboard = () => {
       setError('An error occurred while adding the task');
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
