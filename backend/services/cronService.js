@@ -88,8 +88,8 @@ export const getUserSubscription = async (userId) => {
   try {
     const [subscription] = await db
       .select()
-      .from(userSubscriptions)
-      .where(eq(userSubscriptions.userId, userId))
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
       .limit(1);
 
     if (subscription) {
