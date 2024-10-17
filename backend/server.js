@@ -21,6 +21,23 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/subscribe', subscriptionRoutes);
 
+const cronhandler = async (req, res) => {
+  if (req.method === 'POST') {
+    try {
+        setupCronJobs();
+      res.status(200).json({ message: 'Cron job executed successfully' });
+    } catch (error) {
+      console.error('Error executing cron job:', error);
+      res.status(500).json({ error: 'Failed to execute cron job' });
+    }
+  } else {
+    res.setHeader('Allow', ['POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+}
+
+app.post('/api/cron', cronhandler);
+
 app.get('/', (req, res) => {
   res.send('Welcome to the Notification Manager App with Supabase and Drizzle ORM');
 });

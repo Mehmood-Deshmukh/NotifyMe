@@ -21,22 +21,11 @@ export const createTask = async (req, res) => {
   }
 
   try {
-    let formattedDueDate = new Date(dueDate);
-    let formattedReminderTime = new Date(reminderTime);
-
-    if (process.env.VERCEL) {
-      formattedDueDate = new Date(formattedDueDate.getTime() - 5.5 * 60 * 60 * 1000);
-      formattedReminderTime = new Date(formattedReminderTime.getTime() - 5.5 * 60 * 60 * 1000);
-    }
-
-    console.log('formattedDueDate', formattedDueDate);
-    console.log('formattedReminderTime', formattedReminderTime);
-
     const [newTask] = await db.insert(tasks).values({
       userId: req.user.id,
       taskName,
-      dueDate: formattedDueDate,
-      reminderTime: formattedReminderTime,
+      dueDate: new Date(dueDate),
+      reminderTime: new Date(reminderTime),
       isCompleted: false
     }).returning();
 
