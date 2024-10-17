@@ -9,7 +9,6 @@ const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [newTaskName, setNewTaskName] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [reminderTime, setReminderTime] = useState('');
   const [error, setError] = useState('');
 
   const baseUrl = process.env.REACT_APP_BASE_URL;
@@ -23,8 +22,8 @@ const Dashboard = () => {
     try {
       const response = await fetch(`${baseUrl}/api/tasks`, {
         headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
+          'Authorization': `Bearer ${user.token}`,
+        },
       });
 
       if (response.ok) {
@@ -44,8 +43,8 @@ const Dashboard = () => {
   };
 
   const handleAddTask = async () => {
-    if (!newTaskName || !dueDate || !reminderTime) {
-      setError('Please enter task name, due date, and reminder time');
+    if (!newTaskName || !dueDate) {
+      setError('Please enter task name and due date');
       return;
     }
     try {
@@ -53,15 +52,14 @@ const Dashboard = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': `Bearer ${user.token}`,
         },
-        body: JSON.stringify({ taskName: newTaskName, dueDate, reminderTime })
+        body: JSON.stringify({ taskName: newTaskName, dueDate }),
       });
 
       if (response.ok) {
         setNewTaskName('');
         setDueDate('');
-        setReminderTime('');
         fetchTasks();
       } else {
         setError('Failed to add task');
@@ -72,72 +70,75 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4">Welcome to your Dashboard</h1>
-        {user && <p className="mb-4">Hello, {user.firstname || user.email}!</p>}
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="newTaskName" className="block text-sm font-medium text-gray-700">Task Name</label>
-            <input
-              id="newTaskName"
-              value={newTaskName}
-              onChange={(e) => setNewTaskName(e.target.value)}
-              placeholder="Enter task name"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-          </div>
-          <div>
-            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">Due Date</label>
-            <input
-              id="dueDate"
-              type="datetime-local"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-          </div>
-          <div>
-            <label htmlFor="reminderTime" className="block text-sm font-medium text-gray-700">Reminder Time</label>
-            <input
-              id="reminderTime"
-              type="datetime-local"
-              value={reminderTime}
-              onChange={(e) => setReminderTime(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-          </div>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Hello, Mehmood!</h1>
+      
+      {/* Error Message */}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {/* Add New Task */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            placeholder="Task Name"
+            value={newTaskName} // Changed from newTask to newTaskName
+            onChange={(e) => setNewTaskName(e.target.value)} // Corrected the state variable
+            className="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
+          />
+          <input
+            type="datetime-local"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
           <button
-            onClick={handleAddTask}
-            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            onClick={handleAddTask} // Changed from addTask to handleAddTask
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600"
           >
-            Add Task
+            Add
           </button>
         </div>
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline"> {error}</span>
-          </div>
-        )}
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold mb-2">Your Tasks</h2>
-          {tasks.map((task) => (
-            <div key={task.id} className="bg-gray-50 p-3 rounded-md mb-2">
-              <p className="text-gray-800">{task.taskName}</p>
-              <p className="text-sm text-gray-500">Due: {new Date(task.dueDate).toLocaleString()}</p>
-              <p className="text-sm text-gray-500">Reminder: {new Date(task.reminderTime).toLocaleString()}</p>
-              <p className="text-sm text-gray-500">Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
-            </div>
-          ))}
-        </div>
-        <button
-          onClick={handleLogout}
-          className="mt-6 w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Logout
-        </button>
       </div>
+  
+      {/* Manage Tasks */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Manage Your Tasks</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tasks.length === 0 ? (
+            <div className="bg-gray-50 p-4 rounded-lg shadow-md text-center">
+              <p className="text-gray-500">No tasks found.</p>
+            </div>
+          ) : (
+            tasks.map((task) => (
+              <div key={task.id} className="bg-blue-100 p-4 rounded-lg shadow-md">
+                <h3 className="text-lg font-bold">{task.name}</h3>
+                <p className="text-gray-600">Due Date: {task.dueDate}</p>
+                <div className="mt-2">
+                  <span
+                    className={`${
+                      task.status === 'Complete'
+                        ? 'bg-green-500'
+                        : 'bg-yellow-500'
+                    } text-white text-sm px-2 py-1 rounded`}
+                  >
+                    {task.status}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+  
+      {/* Logout Button */}
+      <button
+        onClick={handleLogout} // Added onClick handler
+        className="mt-8 bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600"
+      >
+        Logout
+      </button>
     </div>
   );
 };

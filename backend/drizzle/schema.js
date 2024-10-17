@@ -28,7 +28,6 @@ export const tasks = pgTable('tasks', {
   userId: uuid('user_id').notNull().references(() => users.id),
   taskName: varchar('task_name').notNull(),
   dueDate: timestamp('due_date').notNull(),
-  reminderTime: timestamp('reminder_time').notNull(),
   isCompleted: boolean('is_completed').notNull(),
   createdAt: timestamp('created_at').notNull().default('now()'),
   updatedAt: timestamp('updated_at').notNull().default('now()')

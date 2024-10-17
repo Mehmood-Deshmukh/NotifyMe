@@ -14,10 +14,10 @@ export const getTasks = async (req, res) => {
 };
 
 export const createTask = async (req, res) => {
-  const { taskName, dueDate, reminderTime } = req.body;
+  const { taskName, dueDate } = req.body;
   
-  if (!taskName || !dueDate || !reminderTime) {
-    return res.status(400).json({ error: 'Task name, due date, and reminder time are required' });
+  if (!taskName || !dueDate) {
+    return res.status(400).json({ error: 'Task name, due date are required' });
   }
 
   try {
@@ -25,7 +25,6 @@ export const createTask = async (req, res) => {
       userId: req.user.id,
       taskName,
       dueDate: new Date(dueDate),
-      reminderTime: new Date(reminderTime),
       isCompleted: false
     }).returning();
 

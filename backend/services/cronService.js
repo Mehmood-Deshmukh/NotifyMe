@@ -2,8 +2,8 @@ import cron from "node-cron";
 import { subscriptions, tasks } from "../drizzle/schema.js";
 import db from "../config/db.js";
 import { eq, lte } from "drizzle-orm";
-import { sendNotification } from "./webPushService.js";
-import webpush from 'web-push';
+import webpush from "web-push";
+
 const scheduledTasks = new Map();
 
 export const setupCronJobs = () => {
@@ -13,6 +13,7 @@ export const setupCronJobs = () => {
       .select()
       .from(tasks)
       .where(lte(tasks.scheduledTime, now));
+
     for (const task of dueTasks) {
       const userSubscription = await getUserSubscription(task.userId);
       if (userSubscription) {
@@ -25,33 +26,30 @@ export const setupCronJobs = () => {
     }
   });
 };
+
 export const scheduleNotification = async (task) => {
-  const { id, taskName, reminderTime } = task;
+  const { id, taskName, dueDate } = task;
+  const reminderDate = new Date(dueDate);
 
-  const reminderDate = new Date(reminderTime);
-  const minutes = reminderDate.getMinutes();
-  const hours = reminderDate.getHours();
-  const dayOfMonth = reminderDate.getDate();
-  const month = reminderDate.getMonth() + 1; 
-  const dayOfWeek = reminderDate.getDay();
+  scheduleReminder(reminderDate, id, taskName, task.userId, 60, "Task Reminder 1hr before");  
+  scheduleReminder(reminderDate, id, taskName,task.userId,  30, "Task Reminder 30min before"); 
+  scheduleReminder(reminderDate, id, taskName, task.userId, 15, "Task Reminder 15min before"); 
+};
+
+const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, title) => {
+  const reminderTime = new Date(dueDate.getTime() - minutesBefore * 60000); 
 
 
-  const cronPattern = `${minutes} ${hours} ${dayOfMonth} ${month} ${dayOfWeek}`;
-
-  console.log(
-    `Scheduling notification for task ${id} with cron pattern: ${cronPattern}`
-  );
-  console.log(`Current date: ${new Date()}`);
-  console.log(`Reminder date: ${reminderDate}`);
+  const cronPattern = `${reminderTime.getMinutes()} ${reminderTime.getHours()} ${reminderTime.getDate()} ${reminderTime.getMonth() + 1} *`;
 
   const job = cron.schedule(cronPattern, async () => {
     console.log(`Sending notification for task: ${taskName}`);
-
+    
     try {
       const userSubscriptions = await db
         .select()
         .from(subscriptions)
-        .where(eq(subscriptions.userId, task.userId));
+        .where(eq(subscriptions.userId, userId));
 
       for (const subscription of userSubscriptions) {
         const pushSubscription = {
@@ -63,7 +61,7 @@ export const scheduleNotification = async (task) => {
         };
 
         const payload = JSON.stringify({
-          title: "Task Reminder",
+          title,
           body: `Don't forget: ${taskName}`,
         });
 
@@ -74,7 +72,8 @@ export const scheduleNotification = async (task) => {
     }
   });
 
-  scheduledTasks.set(id, job);
+  scheduledTasks.set(taskId, job);
+  console.log(`Scheduled notification for task ${taskId}`);
 };
 
 export const cancelScheduledNotification = (taskId) => {
