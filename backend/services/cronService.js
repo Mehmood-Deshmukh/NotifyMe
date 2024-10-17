@@ -36,7 +36,8 @@ export const scheduleNotification = async (task) => {
   const dayOfWeek = reminderDate.getDay();
 
 
-  const cronPattern = `${minutes} ${hours} ${dayOfMonth} ${month} ${dayOfWeek}`;
+  /* const cronPattern = `${minutes} ${hours} ${dayOfMonth} ${month} ${dayOfWeek}`; */
+  const cronPattern = `*/1 * * * *`; // every minute
 
   console.log(
     `Scheduling notification for task ${id} with cron pattern: ${cronPattern}`
