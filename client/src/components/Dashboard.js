@@ -69,22 +69,42 @@ const Dashboard = () => {
     }
   };
 
+  const renderTask = (task) => {
+    const isCompleted = new Date() > new Date(task.dueDate);
+
+    return (
+      <div key={task.id} className="bg-blue-100 p-4 rounded-lg shadow-md">
+        <h3 className="text-lg font-bold">{task.taskName}</h3>
+        <p className="text-gray-600">Due Date: {task.dueDate}</p>
+        <div className="mt-2">
+          <span
+            className={`${
+              isCompleted
+                ? 'bg-green-500'
+                : 'bg-yellow-500'
+            } text-white text-sm px-2 py-1 rounded`}
+          >
+            {isCompleted ? 'Completed' : 'Pending'}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6">Hello, Mehmood!</h1>
-      
-      {/* Error Message */}
+
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
-      {/* Add New Task */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
         <div className="flex space-x-4">
           <input
             type="text"
             placeholder="Task Name"
-            value={newTaskName} // Changed from newTask to newTaskName
-            onChange={(e) => setNewTaskName(e.target.value)} // Corrected the state variable
+            value={newTaskName} 
+            onChange={(e) => setNewTaskName(e.target.value)}
             className="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex-grow"
           />
           <input
@@ -94,7 +114,7 @@ const Dashboard = () => {
             className="border border-gray-300 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
-            onClick={handleAddTask} // Changed from addTask to handleAddTask
+            onClick={handleAddTask}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600"
           >
             Add
@@ -102,7 +122,6 @@ const Dashboard = () => {
         </div>
       </div>
   
-      {/* Manage Tasks */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">Manage Your Tasks</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -112,29 +131,15 @@ const Dashboard = () => {
             </div>
           ) : (
             tasks.map((task) => (
-              <div key={task.id} className="bg-blue-100 p-4 rounded-lg shadow-md">
-                <h3 className="text-lg font-bold">{task.name}</h3>
-                <p className="text-gray-600">Due Date: {task.dueDate}</p>
-                <div className="mt-2">
-                  <span
-                    className={`${
-                      task.status === 'Complete'
-                        ? 'bg-green-500'
-                        : 'bg-yellow-500'
-                    } text-white text-sm px-2 py-1 rounded`}
-                  >
-                    {task.status}
-                  </span>
-                </div>
-              </div>
+              renderTask(task)
             ))
           )}
         </div>
       </div>
   
-      {/* Logout Button */}
+
       <button
-        onClick={handleLogout} // Added onClick handler
+        onClick={handleLogout} 
         className="mt-8 bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600"
       >
         Logout
