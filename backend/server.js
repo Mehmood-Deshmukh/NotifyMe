@@ -1,4 +1,4 @@
-import express from 'express';
+/* import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
@@ -31,10 +31,9 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-export default app;
+export default app; */
 
-// node cluster code:
-/* 
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -88,4 +87,3 @@ if (cluster.isMaster) {
 }
 
 export default startServer;
-*/

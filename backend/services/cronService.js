@@ -37,9 +37,7 @@ export const scheduleNotification = async (task) => {
 };
 
 const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, title) => {
-  const reminderTime = new Date(dueDate.getTime() - minutesBefore * 60000); 
-
-
+  const reminderTime = new Date(dueDate.getTime() - minutesBefore * 60000);
   const cronPattern = `${reminderTime.getMinutes()} ${reminderTime.getHours()} ${reminderTime.getDate()} ${reminderTime.getMonth() + 1} *`;
 
   const job = cron.schedule(cronPattern, async () => {
@@ -67,6 +65,11 @@ const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, titl
 
         await webpush.sendNotification(pushSubscription, payload);
       }
+
+      if (minutesBefore === 15) {
+        scheduleTaskCompletion(dueDate, taskId);
+      }
+
     } catch (error) {
       console.error("Error sending notification:", error);
     }
@@ -75,6 +78,31 @@ const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, titl
   scheduledTasks.set(taskId, job);
   console.log(`Scheduled notification for task ${taskId}`);
 };
+
+const scheduleTaskCompletion = (dueDate, taskId) => {
+  const completionTime = new Date(dueDate.getTime() + 15 * 60000); 
+
+  const cronPattern = `${completionTime.getMinutes()} ${completionTime.getHours()} ${completionTime.getDate()} ${completionTime.getMonth() + 1} *`;
+
+  const completionJob = cron.schedule(cronPattern, async () => {
+    try {
+      await db.update(tasks)
+        .set({ isCompleted: true })
+        .where(eq(tasks.id, taskId));
+
+      console.log(`Task ${taskId} marked as completed after 15 minutes.`);
+      
+      completionJob.stop();
+    } catch (error) {
+      console.error("Error updating task as completed:", error);
+    }
+  });
+
+  console.log(`Scheduled task completion for task ${taskId} 15 minutes after due date.`);
+};
+
+
+
 
 export const cancelScheduledNotification = (taskId) => {
   const job = scheduledTasks.get(taskId);
