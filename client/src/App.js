@@ -5,6 +5,7 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import HomePage from './components/home';
+import Timetable from './components/timetable';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -30,6 +31,10 @@ function AppRoutes() {
       <Route
         path="/"
         element={user ? <Navigate to="/home" /> : <Login />}
+      />
+      <Route
+        path="/timetable"
+        element={user ? <Timetable /> : <Navigate to="/login" />}
       />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

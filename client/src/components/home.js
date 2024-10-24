@@ -20,7 +20,7 @@ const HomePage = () => {
   };
 
   const handleTimetable = () => {
-    navigate("/dashboard");
+    navigate("/timetable");
   };
 
   if (!user) {
