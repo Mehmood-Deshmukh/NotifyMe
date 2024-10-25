@@ -1,10 +1,11 @@
-import { timetables, notifications, tasks } from '../drizzle/schema.js';
+import { timetables, notifications, tasks, users } from '../drizzle/schema.js';
 import db from '../config/db.js';
 import { eq } from 'drizzle-orm';
 import { parse } from 'csv-parse/sync';
 import cron from 'node-cron';
 import { scheduleNotification } from '../services/cronService.js';
 import { promises as fs } from 'fs';
+import sendEmail from '../services/emailService.js';
 
 const activeSchedules = new Map();
 
@@ -157,7 +158,13 @@ const scheduleClassNotifications = async (timetable, userId) => {
         'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5
     };
 
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    const userEmail = user.email;
+
+    let totalClasses = 0;
+
     Object.entries(schedule).forEach(([day, classes]) => {
+        totalClasses += classes.length;
         classes.forEach(async (classInfo) => {
             const [startHour, startMinute] = classInfo.time.split('-')[0].trim().split(':').map(Number);
             
@@ -179,6 +186,15 @@ const scheduleClassNotifications = async (timetable, userId) => {
             
             const job = cron.schedule(cronPattern, async () => {
                 try {
+
+                    await sendEmail({
+                        to: userEmail,
+                        template: 'upcomingClass',
+                        data: {
+                            className: classInfo.subject,
+                            timeSlot: classInfo.time
+                        }
+                    });
         
                     await db.insert(notifications).values({
                         userId: userId,
@@ -208,6 +224,14 @@ const scheduleClassNotifications = async (timetable, userId) => {
             const scheduleKey = `${timetable.id}-${day}-${classInfo.time}`;
             activeSchedules.set(scheduleKey, job);
         });
+    });
+
+    await sendEmail({
+        to: userEmail,
+        template: 'timetableUploaded',
+        data: {
+            totalClasses
+        }
     });
 };
 

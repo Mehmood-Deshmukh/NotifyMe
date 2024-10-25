@@ -1,8 +1,9 @@
 import cron from "node-cron";
-import { subscriptions, tasks } from "../drizzle/schema.js";
+import { subscriptions, tasks, users } from "../drizzle/schema.js";
 import db from "../config/db.js";
 import { eq, lte } from "drizzle-orm";
 import webpush from "web-push";
+import sendEmail from "./emailService.js";
 
 const scheduledTasks = new Map();
 
@@ -44,6 +45,18 @@ const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, titl
     console.log(`Sending notification for task: ${taskName}`);
     
     try {
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const userEmail = user[0].email;
+
+      await sendEmail({
+        to: userEmail,
+        template: 'taskReminder',
+        data: {
+          taskName,
+          timeLeft: `${minutesBefore} minutes`
+        }
+      });
+
       const userSubscriptions = await db
         .select()
         .from(subscriptions)
@@ -67,7 +80,7 @@ const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, titl
       }
 
       if (minutesBefore === 15) {
-        scheduleTaskCompletion(dueDate, taskId);
+        scheduleTaskCompletion(dueDate, taskId, taskName, userId);
       }
 
     } catch (error) {
@@ -79,7 +92,7 @@ const scheduleReminder = (dueDate, taskId, taskName, userId, minutesBefore, titl
   console.log(`Scheduled notification for task ${taskId}`);
 };
 
-const scheduleTaskCompletion = (dueDate, taskId) => {
+const scheduleTaskCompletion = (dueDate, taskId, taskName, userId) => {
   const completionTime = new Date(dueDate.getTime() + 15 * 60000); 
 
   const cronPattern = `${completionTime.getMinutes()} ${completionTime.getHours()} ${completionTime.getDate()} ${completionTime.getMonth() + 1} *`;
@@ -89,6 +102,17 @@ const scheduleTaskCompletion = (dueDate, taskId) => {
       await db.update(tasks)
         .set({ isCompleted: true })
         .where(eq(tasks.id, taskId));
+
+        const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        const userEmail = user[0].email;
+  
+        await sendEmail({
+          to: userEmail,
+          template: 'taskCompleted',
+          data: {
+            taskName
+          }
+        });
 
       console.log(`Task ${taskId} marked as completed after 15 minutes.`);
       
