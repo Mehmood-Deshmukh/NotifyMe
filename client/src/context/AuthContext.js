@@ -11,6 +11,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const parsedUser = storedUser && JSON.parse(storedUser);
+    console.log(parsedUser);
     if (parsedUser && !isTokenExpired(parsedUser.token)) {
       setUser(parsedUser);
     } else {
@@ -21,7 +22,6 @@ export const AuthProvider = ({ children }) => {
   const isTokenExpired = (token) => {
     try {
       const { exp } = JSON.parse(atob(token.split('.')[1]));
-      console.log(exp);
       return Date.now() >= exp * 1000;
     } catch {
       return true; 

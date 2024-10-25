@@ -1,28 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { setupWebPush } from '../webPushSetup';
-import { Plus, LogOut, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { setupWebPush } from "../webPushSetup";
+import { Plus, LogOut, Calendar } from "lucide-react";
+import { Toast } from 'primereact/toast';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
-  const [newTaskName, setNewTaskName] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [error, setError] = useState('');
+  const [newTaskName, setNewTaskName] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [loading, setLoading] = useState(false);
   const baseUrl = process.env.REACT_APP_BASE_URL;
+  const toast = useRef(null);
 
   useEffect(() => {
     fetchTasks();
     setupWebPush(user);
   }, [user]);
 
+  const showToast = (severity, summary, detail) => {
+    toast.current.show({
+      severity: severity,
+      summary: summary,
+      detail: detail,
+      life: 3000
+    });
+  };
+
   const fetchTasks = async () => {
     try {
+      setLoading(true);
       const response = await fetch(`${baseUrl}/api/tasks`, {
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          Authorization: `Bearer ${user.token}`,
         },
       });
 
@@ -30,66 +42,74 @@ const Dashboard = () => {
         const data = await response.json();
         setTasks(data.tasks);
       } else {
-        setError('Failed to fetch tasks');
+        showToast('error', 'Error', 'Failed to fetch tasks');
       }
+
+      setLoading(false);
     } catch (err) {
-      setError('An error occurred while fetching tasks');
+      showToast('error', 'Error', 'An error occurred while fetching tasks');
+      setLoading(false);
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    showToast('info', 'Logged Out', 'You have been successfully logged out');
+    navigate("/login");
   };
 
   const handleAddTask = async () => {
     if (!newTaskName || !dueDate) {
-      setError('Please enter task name and due date');
+      showToast('warn', 'Validation Error', 'Please enter task name and due date');
       return;
     }
     try {
       const response = await fetch(`${baseUrl}/api/tasks`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({ taskName: newTaskName, dueDate }),
       });
 
       if (response.ok) {
-        setNewTaskName('');
-        setDueDate('');
+        showToast('success', 'Success', 'Task added successfully');
+        setNewTaskName("");
+        setDueDate("");
         fetchTasks();
       } else {
-        setError('Failed to add task');
+        showToast('error', 'Error', 'Failed to add task');
       }
     } catch (err) {
-      setError('An error occurred while adding the task');
+      showToast('error', 'Error', 'An error occurred while adding the task');
     }
   };
 
   const renderTask = (task) => {
     const isCompleted = new Date() > new Date(task.dueDate);
-    const formattedDate = new Date(task.dueDate).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    const formattedDate = new Date(task.dueDate).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
     return (
-      <div key={task.id} className="bg-white rounded-lg p-6 shadow-sm transition-all hover:shadow-md border border-gray-100">
+      <div
+        key={task.id}
+        className="bg-white rounded-lg p-6 shadow-sm transition-all hover:shadow-md border border-gray-100"
+      >
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-medium text-gray-900">{task.taskName}</h3>
           <span
             className={`${
               isCompleted
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-amber-50 text-amber-700'
+                ? "bg-emerald-50 text-emerald-700"
+                : "bg-amber-50 text-amber-700"
             } text-xs px-2 py-1 rounded-full font-medium`}
           >
-            {isCompleted ? 'Completed' : 'Pending'}
+            {isCompleted ? "Completed" : "Pending"}
           </span>
         </div>
         <div className="flex items-center text-gray-500 text-sm">
@@ -102,9 +122,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toast ref={toast} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-medium text-gray-900">Welcome back, Mehmood</h1>
+          <h1 className="text-2xl font-medium text-gray-900">
+            Welcome back, Mehmood
+          </h1>
           <button
             onClick={handleLogout}
             className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors"
@@ -113,12 +136,6 @@ const Dashboard = () => {
             <span>Sign out</span>
           </button>
         </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
 
         <div className="mb-8">
           <div className="flex gap-4">
@@ -144,16 +161,23 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tasks.length === 0 ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500">No tasks yet. Add your first task to get started.</p>
-            </div>
-          ) : (
-            tasks.map(renderTask)
-          )}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tasks.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">
+                  No tasks yet. Add your first task to get started.
+                </p>
+              </div>
+            ) : (
+              tasks.map(renderTask)
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

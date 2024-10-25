@@ -48,7 +48,7 @@ const Signup = () => {
     try {
       const result = await googleSignIn(response.credential);
       if (result.success) {
-        navigate('/dashboard');
+        navigate('/home');
       } else {
         setError(result.error);
       }
@@ -75,7 +75,6 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 px-4">
       <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl">
-        {/* Brand Header */}
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl inline-flex items-center justify-center mb-6 transform hover:rotate-6 transition-transform">
             <svg
@@ -179,7 +178,7 @@ const Signup = () => {
         </div>
 
         <div className="flex justify-center mt-6">
-  <div id="googleSignInButton" className={`h-12 w-full ${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
+  <div id="googleSignInButton" className={`h-12 ${isGoogleLoading ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
           </div>
 
           {isGoogleLoading && (

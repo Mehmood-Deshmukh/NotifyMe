@@ -1,18 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Upload, Calendar, Trash2, AlertCircle, Clock } from 'lucide-react';
+import { Toast } from 'primereact/toast';
 
 const Timetable = () => {
   const { user } = useAuth();
   const [timetables, setTimetables] = useState([]);
   const [activeSchedule, setActiveSchedule] = useState(null);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const baseUrl = process.env.REACT_APP_BASE_URL;
+  const toast = useRef(null);
 
   useEffect(() => {
     fetchTimetables();
   }, [user]);
+
+  const showToast = (severity, summary, detail) => {
+    toast.current.show({
+      severity,
+      summary,
+      detail,
+      life: 3000
+    });
+  };
 
   const fetchTimetables = async () => {
     try {
@@ -29,9 +39,11 @@ const Timetable = () => {
         if (data.timetables.length > 0) {
           setActiveSchedule(data.timetables[0]);
         }
+      } else {
+        showToast('error', 'Error', 'Failed to fetch timetables');
       }
     } catch (err) {
-      setError('Failed to fetch timetables');
+      showToast('error', 'Error', 'Failed to fetch timetables');
     } finally {
       setLoading(false);
     }
@@ -42,7 +54,7 @@ const Timetable = () => {
     if (!file) return;
 
     if (file.type !== 'text/csv') {
-      setError('Please upload a CSV file');
+      showToast('warn', 'Invalid File', 'Please upload a CSV file');
       return;
     }
 
@@ -60,12 +72,13 @@ const Timetable = () => {
       });
 
       if (response.ok) {
+        showToast('success', 'Success', 'Timetable uploaded successfully');
         fetchTimetables();
       } else {
-        setError('Failed to upload timetable');
+        showToast('error', 'Error', 'Failed to upload timetable');
       }
     } catch (err) {
-      setError('An error occurred while uploading');
+      showToast('error', 'Error', 'An error occurred while uploading');
     } finally {
       setLoading(false);
     }
@@ -81,10 +94,13 @@ const Timetable = () => {
       });
 
       if (response.ok) {
+        showToast('success', 'Success', 'Timetable deleted successfully');
         fetchTimetables();
+      } else {
+        showToast('error', 'Error', 'Failed to delete timetable');
       }
     } catch (err) {
-      setError('Failed to delete timetable');
+      showToast('error', 'Error', 'Failed to delete timetable');
     }
   };
 
@@ -128,6 +144,7 @@ const Timetable = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toast ref={toast} />
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-medium text-gray-900">Class Schedule</h1>
@@ -142,13 +159,6 @@ const Timetable = () => {
             />
           </label>
         </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center">
-            <AlertCircle size={18} className="mr-2" />
-            {error}
-          </div>
-        )}
 
         {loading ? (
           <div className="text-center py-12">

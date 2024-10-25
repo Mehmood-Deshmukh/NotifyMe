@@ -6,6 +6,7 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import HomePage from './components/home';
 import Timetable from './components/timetable';
+import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -44,9 +45,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
+      <PrimeReactProvider>
       <Router>
         <AppRoutes />
       </Router>
+      </PrimeReactProvider>
     </AuthProvider>
   );
 }

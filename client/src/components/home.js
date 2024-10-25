@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { LogOut } from "lucide-react";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -58,23 +59,12 @@ const HomePage = () => {
                 {user?.email || "User"}
               </span>
               <button
-                onClick={handleLogout}
-                className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
-                aria-label="Logout"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3zm11 4.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L12.586 6H8a1 1 0 1 1 0-2h7a1 1 0 0 1 1 1v7a1 1 0 1 1-2 0V7.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+            onClick={handleLogout}
+            className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <LogOut size={18} className="mr-2" />
+            <span>Sign out</span>
+          </button>
             </div>
           </div>
         </div>
