@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { tasks, users } from "../drizzle/schema.js";
+import { users } from "../drizzle/schema.js";
 import db from "../config/db.js";
 import { eq } from "drizzle-orm";
 import sendEmail from "./emailService.js";
@@ -27,6 +27,8 @@ const scheduleReminder = async (dueDate, taskId, taskName, userId, minutesBefore
       const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
       const userEmail = user[0].email;
 
+      const description = `Task "${taskName}" is due in ${minutesBefore} minutes`;
+      await sendNotificationsToUser(userId, title, description, taskId);
 
       await sendEmail({
         to: userEmail,
@@ -37,8 +39,7 @@ const scheduleReminder = async (dueDate, taskId, taskName, userId, minutesBefore
         }
       });
 
-      const description = `Task "${taskName}" is due in ${minutesBefore} minutes`;
-      await sendNotificationsToUser(userId, title, description, taskId);
+
 
     } catch (error) {
       console.error("Error in reminder job:", error);

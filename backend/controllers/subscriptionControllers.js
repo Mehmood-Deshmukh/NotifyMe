@@ -12,11 +12,17 @@ export const addSubscription = async (req, res) => {
 
   try {
 
-    const existingSubscription = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).limit(1);
-    if (existingSubscription.length > 0) {
-        return res.status(400).json({ error: 'Subscription already exists' });
-    }
+    const existingSubscription = await db
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .where(eq(subscriptions.endpoint, endpoint))
+      .limit(1);
 
+    if (existingSubscription.length > 0) {
+      return res.status(400).json({ error: "Subscription already exists." });
+    }
+    
     await db
       .insert(subscriptions)
       .values({
