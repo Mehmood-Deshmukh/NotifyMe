@@ -84,8 +84,8 @@ function startServer() {
   return app;
 }
 
-if (cluster.isMaster) {
-  console.log(`Master ${process.pid} is running`);
+if (cluster.isPrimary) {
+  console.log(`Primary ${process.pid} is running`);
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }

@@ -4,8 +4,8 @@ import authenticateToken from '../middleware/authToken.js';
 
 
 const router = express.Router();
+router.use(authenticateToken);
 
-
-router.post('/', authenticateToken, addSubscription);
+router.post('/', addSubscription);
 
 export default router;
