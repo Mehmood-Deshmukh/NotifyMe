@@ -3,8 +3,6 @@ import { pgTable, serial, text, varchar, boolean, timestamp, jsonb, uuid } from 
 export const notifications = pgTable('notifications', {
   id: serial('id').primaryKey().notNull(),
   userId: uuid('user_id').notNull().references(() => users.id),
-  taskId: serial('task_id').references(() => tasks.id),
-  timetableId: serial('timetable_id').references(() => timetables.id),
   title: text('title').notNull(),
   description: text('description').notNull(),
   status: varchar('status').notNull(),

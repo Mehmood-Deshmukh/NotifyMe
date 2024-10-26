@@ -2,6 +2,7 @@ import { tasks } from '../drizzle/schema.js';
 import db from '../config/db.js';
 import { eq } from 'drizzle-orm';
 import { scheduleNotification, cancelScheduledNotification } from '../services/cronService.js';
+import sendEmail from '../services/emailService.js';
 
 export const getTasks = async (req, res) => {
   try {
@@ -56,7 +57,21 @@ export const updateTask = async (req, res) => {
       return res.status(404).json({ error: 'Task not found' });
     }
 
-    scheduleNotification(updatedTask);
+    const userEmail = req.user.email;
+
+    if(isCompleted){
+
+      await sendEmail({
+        to: userEmail,
+        template: 'taskCompleted',
+        data: {
+          taskName
+        }
+      });
+    }else{
+      scheduleNotification(updatedTask);
+    }
+
     res.json({ task: updatedTask });
   } catch (error) {
     console.error('Error updating task:', error);

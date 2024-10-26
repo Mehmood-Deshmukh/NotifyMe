@@ -91,7 +91,12 @@ const Dashboard = () => {
   const startEditing = (task) => {
     setEditingTaskId(task.id);
     setEditTaskName(task.taskName);
-    setEditDueDate(new Date(task.dueDate).toISOString().slice(0, 16));
+    
+    const date = new Date(task.dueDate);
+    const offset = date.getTimezoneOffset();
+    date.setMinutes(date.getMinutes() - offset);
+    setEditDueDate(date.toISOString().slice(0, 16));
+
   };
 
   const cancelEditing = () => {
@@ -152,6 +157,7 @@ const Dashboard = () => {
 
   const handleToggleComplete = async (task) => {
     try {
+      setLoading(true);
       const response = await fetch(`${baseUrl}/api/tasks/${task.id}`, {
         method: "PUT",
         headers: {
@@ -170,8 +176,11 @@ const Dashboard = () => {
       } else {
         showToast('error', 'Error', 'Failed to update task status');
       }
+
+      setLoading(false);
     } catch (err) {
       showToast('error', 'Error', 'An error occurred while updating task status');
+      setLoading(false);
     }
   };
 
@@ -187,6 +196,7 @@ const Dashboard = () => {
     const isOverdue = new Date() > new Date(task.dueDate);
 
     if (isEditing) {
+
       return (
         <div key={task.id} className="bg-white rounded-lg p-6 shadow-sm transition-all hover:shadow-md border border-gray-100">
           <div className="flex flex-col gap-4">
@@ -226,7 +236,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => handleToggleComplete(task)}
+              onClick={() => {handleToggleComplete(task);}}
               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                 task.isCompleted ? "bg-emerald-500 border-emerald-500" : "border-gray-300 hover:border-gray-400"
               }`}

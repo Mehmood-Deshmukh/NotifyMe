@@ -7,40 +7,26 @@ import Dashboard from './components/Dashboard';
 import HomePage from './components/home';
 import Timetable from './components/timetable';
 import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
-
 function AppRoutes() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/home" /> : <Login />}
-      />
-      <Route
-        path="/signup"
-        element={user ? <Navigate to="/home" /> : <Signup />}
-      />
-      <Route
-        path="/dashboard"
-        element={user ? <Dashboard /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/home"
-        element={user ? <HomePage /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/"
-        element={user ? <Navigate to="/home" /> : <Login />}
-      />
-      <Route
-        path="/timetable"
-        element={user ? <Timetable /> : <Navigate to="/login" />}
-      />
+      <Route path="/login" element={user ? <Navigate to="/home" /> : <Login />} />
+      <Route path="/signup" element={user ? <Navigate to="/home" /> : <Signup />} />
+      <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+      <Route path="/home" element={user ? <HomePage /> : <Navigate to="/login" />} />
+      <Route path="/" element={user ? <Navigate to="/home" /> : <Login />} />
+      <Route path="/timetable" element={user ? <Timetable /> : <Navigate to="/login" />} />
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
 }
+
 
 function App() {
   return (

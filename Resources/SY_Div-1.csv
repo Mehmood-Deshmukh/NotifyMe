@@ -4,7 +4,5 @@ Time,Monday,Tuesday,Wednesday,Thursday,Friday
 11:30-12:30,PPL,MT,MT,MT,PPL
 12:30-13:30,DSA,DSA,DSA,ENV,-
 13:30-14:30,Lunch,Lunch,Lunch,Lunch,Lunch
-14:30-15:30,-,DSA-Lab,MT-Lab,-,-
-15:30-16:30,-,DSA-Lab,MT-Lab,-,-
-16:30-17:30,-,-,External Lecture,IL,Entre
-17:30-18:30,-,-,External Lecture,IL,Entre
+14:30-16:30,-,DSA-Lab,MT-Lab,-,-
+16:30-18:30,-,-,External Lecture,IL,Entre

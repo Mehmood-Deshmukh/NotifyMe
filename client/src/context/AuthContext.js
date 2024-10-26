@@ -6,17 +6,20 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
   const baseUrl = process.env.REACT_APP_BASE_URL;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const parsedUser = storedUser && JSON.parse(storedUser);
-    console.log(parsedUser);
+    
     if (parsedUser && !isTokenExpired(parsedUser.token)) {
       setUser(parsedUser);
     } else {
       localStorage.removeItem('user');
     }
+
+    setLoading(false);
   }, []);
 
   const isTokenExpired = (token) => {
@@ -24,7 +27,7 @@ export const AuthProvider = ({ children }) => {
       const { exp } = JSON.parse(atob(token.split('.')[1]));
       return Date.now() >= exp * 1000;
     } catch {
-      return true; 
+      return true;
     }
   };
 
@@ -100,7 +103,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, googleSignIn }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, googleSignIn }}>
       {children}
     </AuthContext.Provider>
   );

@@ -44,7 +44,6 @@ import taskRoutes from './routes/taskRoutes.js';
 import timetableRoutes from './routes/timetableRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js'
 import { setupWebPush } from './services/webPushService.js';
-import { setupCronJobs } from './services/cronService.js';
 
 dotenv.config();
 const numCPUs = os.cpus().length;
@@ -65,7 +64,7 @@ function startServer() {
   }));
 
   setupWebPush();
-  setupCronJobs();
+
 
   app.use('/api/auth', authRoutes);
   app.use('/api/tasks', taskRoutes);

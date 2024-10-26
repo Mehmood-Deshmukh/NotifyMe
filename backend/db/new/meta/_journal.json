@@ -50,6 +50,20 @@
       "when": 1729147225805,
       "tag": "0006_loud_scalphunter",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1729926255236,
+      "tag": "0007_wooden_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1729930489273,
+      "tag": "0008_oval_warbird",
+      "breakpoints": true
     }
   ]
 }
