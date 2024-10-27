@@ -21,6 +21,7 @@ Notify Me helps you keep track of your tasks by sending reminders right to your 
 - **Database**: PostgreSQL (Supabase) and Drizzle ORM 
 - **Authentication**: JWT, Supabase
 - **Email Service**: Nodemailer
+- **Notifications**: Webpush API and service workers
 - **Scheduling**: Node cron 
 
 ### Database Design
