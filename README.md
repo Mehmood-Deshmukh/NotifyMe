@@ -1,4 +1,4 @@
-# CodeVault
+# Notify Me!
 
 ## Overview
 
@@ -21,6 +21,17 @@ Notify Me helps you keep track of your tasks by sending reminders right to your 
 - **Database**: PostgreSQL (Supabase) and Drizzle ORM 
 - **Authentication**: JWT, Supabase
 - **Email Service**: Nodemailer
+- **Scheduling**: Node cron 
+
+### Database Design
+![Database Design](./Resources/database_design.png)
+
+### Images
+
+![Tasks Dashboard](./Resources/images/task_dashboard.png)
+![Timetable](./Resources/images/time+table.png)
+![email](./Resources/images/email.png)
+![time_table_email](./Resources/images/timetable_email.png)
 
 ## Architecture
 
